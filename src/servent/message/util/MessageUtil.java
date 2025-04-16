@@ -74,8 +74,16 @@ public class MessageUtil {
 	}
 	
 	public static void sendMessage(Message message) {
-		Thread delayedSender = new Thread(new DelayedMessageSender(message));
+		if (AppConfig.IS_FIFO) {
+			try {
+				pendingMessages.get(message.getReceiverInfo().getId()).put(message);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		} else {
+			Thread delayedSender = new Thread(new DelayedMessageSender(message));
 
-		delayedSender.start();
+			delayedSender.start();
+		}
 	}
 }
